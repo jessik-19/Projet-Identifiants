@@ -1,0 +1,29 @@
+body {
+    background-color: #f7f7f7;
+    color : #1d1d1b;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+h1,h2,h3 {
+    color : #00205b;
+}
+
+.stbutton > button {
+    background-color: #bfa663;
+    color : white;
+    border-radius: 5px;
+    padding: 0.5em 1em;
+    font-weight:  bold;
+}
+
+.stDowloadButton > button {
+    background-color: #00205b;
+    color : white;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.stAlert-success{
+    background-color: #fdecea ;
+    color : #a4282a;
+}
