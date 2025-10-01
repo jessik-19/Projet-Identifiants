@@ -59,7 +59,7 @@ def main ():
     with col2:
         st.markdown("""
     <div style='padding-top: 15px;'>
-    <h1 style='margin-bottom: 0;'>Application interne - Vérification des identifiants</h1>
+    <h1 style='text-align: center;'margin-bottom: 0;'>Application interne - Vérification des identifiants</h1>
     </div>
     """, unsafe_allow_html=True)
     # Texte "Bienvenue" centré

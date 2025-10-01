@@ -16,11 +16,20 @@ h1,h2,h3 {
     font-weight:  bold;
 }
 
-.stDowloadButton > button {
-    background-color: #00205b;
-    color : white;
-    border-radius: 5px;
-    font-weight: bold;
+/* Bouton de téléchargement (Streamlit) */
+.stDownloadButton > button {
+   background-color: #bfa663; /* Doré clair */
+   color: white;
+   border: none;
+   border-radius: 5px;
+   font-weight: bold;
+   padding: 0.5em 1em;
+   cursor: pointer;
+   transition: background-color 0.3s ease;
+}
+
+.stDownloadButton > button:hover {
+   background-color: #a58f4f; /* Doré plus foncé au survol */
 }
 
 .block-container {
