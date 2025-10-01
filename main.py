@@ -53,10 +53,27 @@ def main ():
     st.set_page_config(page_title = "Verification des identifiants", layout="wide")
     load_css()
 
-    st.title("Application interne - Verification des identifiants")
-    st.markdown("Bienvenue dans l'outil de **Controle des identifiants** par utilisateur.")
+    col1, col2 = st.columns([1, 4])  # Logo à gauche, texte à droite
+    with col1:
+        st.image("logo_accor.png", width=120)
+    with col2:
+        st.markdown("""
+    <div style='padding-top: 15px;'>
+    <h1 style='margin-bottom: 0;'>Application interne - Vérification des identifiants</h1>
+    </div>
+    """, unsafe_allow_html=True)
+    # Texte "Bienvenue" centré
+    st.markdown("""
+    <div style='text-align: center; margin-top: -10px; font-size: 18px;'>
+        Bienvenue dans l'outil de <strong>Contrôle des identifiants</strong> par utilisateur.
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br><br>", unsafe_allow_html=True)#ajoutez de l'espace 
 
     st.subheader("1. Importer vos fichiers")
+
+    st.markdown("<br>", unsafe_allow_html=True)#ajoutez de l'espace 
 
     col1, col2, col3 = st.columns(3)
 
