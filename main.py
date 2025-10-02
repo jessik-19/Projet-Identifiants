@@ -12,8 +12,8 @@ def traitement(df_ref, df_back, df_equipe):
    df_ref_filtre = df_ref[df_ref["Date de fin"].isna()]
    Id_ref = set(df_ref_filtre['Identifiant'].dropna().unique())
    df_back["Nom utilisateur"] = df_back["Nom utilisateur"].str.strip().str.upper()
-   df_equipe["LISTE DES UTILISATEURS"] = df_equipe["LISTE DES UTILISATEURS"].str.strip().str.upper()
-   equipe = df_equipe[df_equipe.iloc[:, 1] == 1]["LISTE DES UTILISATEURS"].tolist()
+   df_equipe["LISTE DES UTILISATEURS "] = df_equipe["LISTE DES UTILISATEURS "].str.strip().str.upper()
+   equipe = df_equipe[df_equipe.iloc[:, 1] == 1]["LISTE DES UTILISATEURS "].tolist()
    df_back_filtre = df_back[df_back["Nom utilisateur"].isin(equipe)]
    resultats = []
    for utilisateur in df_back_filtre["Nom utilisateur"].unique():
