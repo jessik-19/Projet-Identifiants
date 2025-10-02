@@ -79,10 +79,16 @@ def main ():
 
     with col1 :
         fichier_ref = st.file_uploader("Identifiant de reference", type =["xlsx"])
+        st.caption("Fichiers de référence contenant tous les identifiants attendus.")
+        st.image("images/exemple_ref.png", use_container_width=True)
     with col2 :
         fichier_back = st.file_uploader("Identifiant Present", type = ["xlsx"])
+        st.caption("Fichier contenant les identifiants réellement utilisés.")
+        st.image("images/exemple_back.png", use_container_width=True)
     with col3 :
         fichier_equipe = st.file_uploader("liste des utilisateurs avec flags", type = ["xlsx"])
+        st.caption("Fichiers avec la liste des utilisateurss avec une colonne de flag.")
+        st.image("images/exemple_equipe.png", use_container_width=True)
 
     if fichier_ref and fichier_back and fichier_equipe :
         try :
