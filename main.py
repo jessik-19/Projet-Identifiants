@@ -8,46 +8,123 @@ def load_css():
        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 # Traitement principal
 def traitement(df_ref, df_back, df_equipe):
-   # Nettoyage
-   df_ref_filtre = df_ref[df_ref["Date de fin"].isna()]
-   Id_ref = set(df_ref_filtre['Identifiant'].dropna().unique())
-   df_back["Nom utilisateur"] = df_back["Nom utilisateur"].str.strip().str.upper()
-   df_equipe["LISTE DES UTILISATEURS "] = df_equipe["LISTE DES UTILISATEURS "].str.strip().str.upper()
-   equipe = df_equipe[df_equipe.iloc[:, 1] == 1]["LISTE DES UTILISATEURS "].tolist()
-   df_back_filtre = df_back[df_back["Nom utilisateur"].isin(equipe)]
-   resultats = []
-   for utilisateur in df_back_filtre["Nom utilisateur"].unique():
+
+    # Nettoyage
+
+    df_ref_filtre = df_ref[df_ref["Date de fin"].isna()]
+
+    # Extraire les 3 colonnes de référence : Identifiant (colonne A), JUR (colonne B), SOUS JUR (colonne D)
+
+    liste_identifiants = df_ref_filtre["Identifiant"].dropna().astype(str).unique()
+
+    liste_jur = df_ref_filtre.iloc[:, 1].dropna().astype(str).unique()         # Colonne B
+
+    liste_sousjur = df_ref_filtre.iloc[:, 3].dropna().astype(str).unique()    # Colonne D
+
+    # Union des 3 ensembles
+
+    Id_ref = set(liste_identifiants) | set(liste_jur) | set(liste_sousjur)
+
+    # Nettoyage des noms utilisateurs
+
+    df_back["Nom utilisateur"] = df_back["Nom utilisateur"].str.strip().str.upper()
+
+    df_back["Identifiant"] = df_back["Identifiant"].astype(str).str.strip()
+
+    df_equipe["LISTE DES UTILISATEURS "] = df_equipe["LISTE DES UTILISATEURS "].str.strip().str.upper()
+    
+
+    # Liste des utilisateurs actifs (flag = 1)
+
+    equipe = df_equipe[df_equipe.iloc[:, 1] == 1]["LISTE DES UTILISATEURS "].tolist()
+
+    # Filtrer df_back uniquement sur les utilisateurs actifs
+
+    df_back_filtre = df_back[df_back["Nom utilisateur"].isin(equipe)]
+
+    # Résultats globaux
+
+    resultats = []
+
+    for utilisateur in df_back_filtre["Nom utilisateur"].unique():
+
+        sous_df = df_back_filtre[df_back_filtre["Nom utilisateur"] == utilisateur]
+
+        id_utilisateur_brut = set(sous_df['Identifiant'].dropna().astype(str).unique())
+
+        id_utilisateur = id_utilisateur_brut & Id_ref
+
+        manquants = Id_ref - id_utilisateur
+
+        presents = Id_ref & id_utilisateur
+
+        resultats.append({
+
+            "utilisateur": utilisateur,
+
+            "nb_identifiants_attendus": len(Id_ref),
+
+            "nb_identifiants_present": len(presents),
+
+            "nb_identifiants_manquants": len(manquants),
+
+            "identifiants_manquants": ", ".join(sorted(manquants))
+
+        })
+
+    df_resultat_global = pd.DataFrame(resultats)
+
+    # Résultats détaillés
+
+    lignes_detaillées = []
+
+    for row in resultats:
+
+        utilisateur = row["utilisateur"]
+
+        identifiants = row["identifiants_manquants"]
+
+        identifiants_list = [i.strip() for i in identifiants.split(",") if i.strip()]
+
+        if identifiants_list:
+
+            for identifiant in identifiants_list:
+
+                lignes_detaillées.append({
+
+                    "utilisateur": utilisateur,
+
+                    "identifiant_manquant": identifiant
+
+                })
+
+        else:
+
+            lignes_detaillées.append({
+
+                "utilisateur": utilisateur,
+
+                "identifiant_manquant": ""
+
+            })
+
+    df_resultat_detaille = pd.DataFrame(lignes_detaillées)
+
+    # Identifiants en trop (non attendus), par utilisateur
+    lignes_en_trop = []
+    for utilisateur in df_back_filtre["Nom utilisateur"].unique():
        sous_df = df_back_filtre[df_back_filtre["Nom utilisateur"] == utilisateur]
-       id_utilisateur_brut = set(sous_df['Identifiant'].dropna().unique())
-       id_utilisateur = id_utilisateur_brut & Id_ref
-       manquants = Id_ref - id_utilisateur
-       present = Id_ref & id_utilisateur
-       resultats.append({
-           "utilisateur": utilisateur,
-           "nb_identifiants_attendus": len(Id_ref),
-           "nb_identifiants_present": len(present),
-           "nb_identifiants_manquants": len(manquants),
-           "identifiants_manquants": ",".join(sorted(manquants))
-       })
-   df_resultat_global = pd.DataFrame(resultats)
-   lignes_detaillées = []
-   for row in resultats:
-       utilisateur = row["utilisateur"]
-       identifiants = row["identifiants_manquants"]
-       identifiants_list = [i.strip() for i in identifiants.split(",") if i.strip()]
-       if identifiants_list:
-           for identifiant in identifiants_list:
-               lignes_detaillées.append({
-                   "utilisateur": utilisateur,
-                   "identifiant_manquant": identifiant
-               })
-       else:
-           lignes_detaillées.append({
+       id_utilisateur_brut = set(sous_df['Identifiant'].dropna().astype(str).unique())
+       id_en_trop = id_utilisateur_brut - Id_ref
+       for identifiant in id_en_trop:
+           lignes_en_trop.append({
                "utilisateur": utilisateur,
-               "identifiant_manquant": ""
+               "identifiant_non_attendu": identifiant
            })
-   df_resultat_detaille = pd.DataFrame(lignes_detaillées)
-   return df_resultat_global, df_resultat_detaille
+    df_resultat_en_trop = pd.DataFrame(lignes_en_trop)
+
+    return df_resultat_global, df_resultat_detaille, df_resultat_en_trop
+
 # streamlit
 def main ():
     st.set_page_config(page_title = "Verification des identifiants", layout="wide")
@@ -59,7 +136,7 @@ def main ():
     with col2:
         st.markdown("""
     <div style='padding-top: 15px;'>
-    <h1 style='text-align: center;'margin-bottom: 0;'>Application interne - Vérification des identifiants</h1>
+    <h1 style='text-align: center;margin-bottom: 0;'>Application interne - Vérification des identifiants</h1>
     </div>
     """, unsafe_allow_html=True)
     # Texte "Bienvenue" centré
@@ -99,7 +176,7 @@ def main ():
             st.success("Fichiers chargés avec succès.")
             st.subheader("2. Resultats")
 
-            df_global, df_detail = traitement (df_ref, df_back, df_equipe)
+            df_global, df_detail, df_id_trop = traitement (df_ref, df_back, df_equipe)
 
             st.write("### Resume par utilisateur")
             st.dataframe(df_global)
@@ -107,18 +184,22 @@ def main ():
             st.write("### Detail des identifiants manquants")
             st.dataframe(df_detail)
 
+            st.write("### Identifiants non attendus")
+            st.dataframe(df_id_trop)            
+
             #telechargement du fichier excel
             output = BytesIO()
             with pd.ExcelWriter(output, engine = "openpyxl") as writer:
-                df_global.to_excel(writer, index = False, sheet_name = 'global')
-                df_detail.to_excel(writer, index = False, sheet_name = 'detail')
+                df_global.to_excel(writer, index=False, sheet_name="Résumé")
+                df_detail.to_excel(writer, index=False, sheet_name="Manquants")
+                df_id_trop.to_excel(writer, index=False, sheet_name="En trop")
             output.seek(0)
 
             st.download_button(
                 label = " Telecharger les resultats(Xlsx)", 
                 data = output,
                 file_name = "Resultats_identifiants.Xlsx", 
-                mime = " application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
         
         except Exception as e :
