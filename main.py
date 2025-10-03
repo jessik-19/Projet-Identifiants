@@ -185,7 +185,12 @@ def main ():
             st.dataframe(df_detail)
 
             st.write("### Identifiants non attendus")
-            st.dataframe(df_id_trop)            
+            st.dataframe(df_id_trop)           
+
+            # 🎯 AJOUT ICI : Tri des DataFrames avant export
+            df_global = df_global.sort_values(by=["utilisateur"])
+            df_detail = df_detail.sort_values(by=["utilisateur", "identifiant_manquant"])
+            df_id_trop = df_id_trop.sort_values(by=["utilisateur", "identifiant_non_attendu"]) 
 
             #telechargement du fichier excel
             output = BytesIO()
